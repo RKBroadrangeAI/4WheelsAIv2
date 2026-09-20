@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ app_name }}</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1>🚀 LangChain + Jev</h1>
+                <p class="subtitle">Fast AI decisions powered by TypeSafe AI's System One model</p>
+            </div>
+            <div class="status-badges">
+                <span class="badge {{ 'badge-success' if has_jev_key else 'badge-demo' }}">
+                    Jev: {{ 'Connected' if has_jev_key else 'Demo Mode' }}
+                </span>
+                <span class="badge {{ 'badge-success' if has_openai_key else 'badge-demo' }}">
+                    LLM: {{ 'Connected' if has_openai_key else 'Demo Mode' }}
+                </span>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="ticket">
+                    📋 Ticket Classifier
+                </button>
+                <button class="tab-btn" data-tab="chat">
+                    💬 Smart Chat
+                </button>
+                <button class="tab-btn" data-tab="info">
+                    ℹ️ What is Jev?
+                </button>
+            </div>
+
+            <!-- Ticket Classifier Tab -->
+            <div id="ticket-tab" class="tab-content active">
+                <div class="card">
+                    <h2>Support Ticket Classifier</h2>
+                    <p class="card-description">
+                        Submit a ticket and watch Jev instantly classify it by department and urgency,
+                        then LangChain generates a suggested response.
+                    </p>
+                    
+                    <form id="ticket-form" class="form">
+                        <div class="form-group">
+                            <label for="subject">Subject</label>
+                            <input type="text" id="subject" placeholder="e.g., Unable to process payment" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="message">Message</label>
+                            <textarea id="message" rows="4" placeholder="Describe your issue..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="btn-text">Classify Ticket</span>
+                            <span class="btn-loading" style="display: none;">Processing...</span>
+                        </button>
+                    </form>
+
+                    <!-- Sample Tickets -->
+                    <div class="samples">
+                        <p class="samples-label">Try these examples:</p>
+                        <div class="sample-buttons">
+                            <button class="sample-btn" data-subject="Payment failed" data-message="I tried to pay my monthly subscription but the payment keeps failing. I've checked my card and it has sufficient funds. This is urgent as my account will be suspended.">
+                                Billing Issue
+                            </button>
+                            <button class="sample-btn" data-subject="API returning 500 error" data-message="Our production integration is down. The API started returning 500 errors about an hour ago. We've tried different endpoints but they all fail. This is blocking our business.">
+                                Technical (Critical)
+                            </button>
+                            <button class="sample-btn" data-subject="Enterprise pricing inquiry" data-message="Hi, we're evaluating your platform for our company (500+ employees). Could you provide information about enterprise pricing and features? Would also like to schedule a demo.">
+                                Sales Inquiry
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results -->
+                <div id="ticket-results" class="results-card" style="display: none;">
+                    <h3>Classification Results</h3>
+                    <div class="results-grid">
+                        <div class="result-item">
+                            <span class="result-label">Department</span>
+                            <span id="result-department" class="result-value badge"></span>
+                            <span id="result-dept-conf" class="confidence"></span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Urgency</span>
+                            <span id="result-urgency" class="result-value badge"></span>
+                            <span id="result-urg-conf" class="confidence"></span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Human Review</span>
+                            <span id="result-human" class="result-value badge"></span>
+                            <span id="result-human-conf" class="confidence"></span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Processing Time</span>
+                            <span id="result-time" class="result-value"></span>
+                        </div>
+                    </div>
+                    <div class="suggested-response">
+                        <h4>Suggested Response (LangChain)</h4>
+                        <p id="result-response"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Tab -->
+            <div id="chat-tab" class="tab-content">
+                <div class="card chat-card">
+                    <h2>Smart Chat with Jev Routing</h2>
+                    <p class="card-description">
+                        Chat with an AI that uses Jev to route your messages to the appropriate handling strategy.
+                    </p>
+
+                    <div id="chat-messages" class="chat-messages">
+                        <div class="chat-message system">
+                            <p>Hello! I'm an AI assistant powered by LangChain with Jev routing. Try asking different types of questions:</p>
+                            <ul>
+                                <li><strong>Simple:</strong> "What is Jev?"</li>
+                                <li><strong>Complex:</strong> "Explain how Jev integrates with LangChain in detail"</li>
+                                <li><strong>Action:</strong> "Can you help me set up my account?"</li>
+                                <li><strong>Escalation:</strong> "I need to speak with a manager"</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <form id="chat-form" class="chat-input-container">
+                        <input type="text" id="chat-input" placeholder="Type your message..." autocomplete="off">
+                        <button type="submit" class="btn btn-primary">Send</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Info Tab -->
+            <div id="info-tab" class="tab-content">
+                <div class="card info-card">
+                    <h2>What is Jev?</h2>
+                    
+                    <div class="info-section">
+                        <h3>Overview</h3>
+                        <p>
+                            <strong>Jev</strong> is TypeSafe AI's <em>System One</em> decision model. Unlike traditional LLMs 
+                            that generate text, Jev is designed for fast, structured decisions with calibrated confidence scores.
+                        </p>
+                    </div>
+
+                    <div class="info-section">
+                        <h3>Key Characteristics</h3>
+                        <ul class="feature-list">
+                            <li>
+                                <span class="feature-icon">⚡</span>
+                                <strong>Up to 200x faster</strong> than comparable LLMs on classification tasks
+                            </li>
+                            <li>
+                                <span class="feature-icon">💰</span>
+                                <strong>Up to 400x lower cost</strong> for decision-making operations
+                            </li>
+                            <li>
+                                <span class="feature-icon">📊</span>
+                                <strong>Calibrated confidence</strong> - probabilities you can trust for application logic
+                            </li>
+                            <li>
+                                <span class="feature-icon">🎯</span>
+                                <strong>Typed outputs</strong> - structured decisions, not free-form text
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="info-section">
+                        <h3>Decision Types</h3>
+                        <div class="decision-types">
+                            <div class="decision-type">
+                                <h4>Choice</h4>
+                                <p>Select from a predefined set of options</p>
+                                <code>department: billing | technical | sales | general</code>
+                            </div>
+                            <div class="decision-type">
+                                <h4>Score</h4>
+                                <p>Return a numerical score in a range</p>
+                                <code>urgency_score: 0.0 - 1.0</code>
+                            </div>
+                            <div class="decision-type">
+                                <h4>Noul (Yes/No)</h4>
+                                <p>Boolean decision with confidence</p>
+                                <code>requires_human: true (0.92 confidence)</code>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="info-section">
+                        <h3>Jev + LangChain Pattern</h3>
+                        <div class="pattern-diagram">
+                            <div class="pattern-step">
+                                <span class="step-number">1</span>
+                                <span class="step-label">Input</span>
+                            </div>
+                            <span class="pattern-arrow">→</span>
+                            <div class="pattern-step jev">
+                                <span class="step-number">2</span>
+                                <span class="step-label">Jev Decision</span>
+                            </div>
+                            <span class="pattern-arrow">→</span>
+                            <div class="pattern-step langchain">
+                                <span class="step-number">3</span>
+                                <span class="step-label">LangChain Response</span>
+                            </div>
+                            <span class="pattern-arrow">→</span>
+                            <div class="pattern-step">
+                                <span class="step-number">4</span>
+                                <span class="step-label">Output</span>
+                            </div>
+                        </div>
+                        <p class="pattern-description">
+                            Use <strong>Jev</strong> for fast routing, classification, and guardrail decisions.
+                            Use <strong>LangChain</strong> for open-ended reasoning and text generation.
+                        </p>
+                    </div>
+
+                    <div class="info-section">
+                        <h3>Use Cases</h3>
+                        <div class="use-cases">
+                            <div class="use-case">
+                                <h4>🔀 Model Routing</h4>
+                                <p>Route queries to the right model based on complexity</p>
+                            </div>
+                            <div class="use-case">
+                                <h4>🛡️ Guardrails</h4>
+                                <p>Check input/output safety before processing</p>
+                            </div>
+                            <div class="use-case">
+                                <h4>🔧 Tool Selection</h4>
+                                <p>Choose the right tool from a known set</p>
+                            </div>
+                            <div class="use-case">
+                                <h4>📧 Ticket Routing</h4>
+                                <p>Classify and route support tickets</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Built with FastAPI, LangChain, and Jev (TypeSafe AI)</p>
+        </footer>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
